@@ -42,9 +42,11 @@ class Report:
         self.state = State.REPORT_START
         self.client = client
         self.message = None
+        self.reported_message_link = None
         self.category = Category.NULL
         self.victim = Victim.NULL
         self.reporter = None
+        self.reporter_id = None
         self.victim_age = -1
         self.perp_age = PerpAge.UNKNOWN
         self.harassment_type = []
@@ -57,6 +59,7 @@ class Report:
         get you started and give you a model for working with Discord. 
         '''
         print("report for message: ", message)
+        reported_message = None
         if message.content == self.CANCEL_KEYWORD:
             self.state = State.REPORT_COMPLETE
             return ["Report cancelled."]
@@ -72,6 +75,7 @@ class Report:
         if self.state == State.AWAITING_MESSAGE:
             # Parse out the three ID strings from the message link
             m = re.search('/(\d+)/(\d+)/(\d+)', message.content)
+            self.reported_message_link = message.content
             if not m:
                 return ["I'm sorry, I couldn't read that link. Please try again or say `cancel` to cancel."]
             guild = self.client.get_guild(int(m.group(1)))
@@ -87,6 +91,7 @@ class Report:
 
             # Here we've found the message - it's up to you to decide what to do next!
             self.state = State.CONFIRM_MESSAGE
+            self.message = message
             return ["I found this message:", "```" + message.author.name + ": " + message.content + "```", \
                     "Is this the message you intended to report?"]
         
@@ -95,7 +100,8 @@ class Report:
         if self.state == State.CONFIRM_MESSAGE:
             confirm_response = message.content.strip().lower()
             if confirm_response == "yes":
-                self.message = message
+                self.reporter = message.author.name
+                self.reporter_id = message.author.id
                 self.state = State.MESSAGE_IDENTIFIED
             elif confirm_response == "no":
                 self.state = State.AWAITING_MESSAGE
@@ -103,7 +109,7 @@ class Report:
                 reply += "You can obtain this link by right-clicking the message and clicking `Copy Message Link`."
                 return [reply]
             else:
-                return ["Please indicate whether this is the messsage you intended to report with a `yes` or `no`."]
+                return ["Please indicate whether this is the message you intended to report with a `yes` or `no`."]
             
         # ask user for high level category 
         if self.state == State.MESSAGE_IDENTIFIED:
