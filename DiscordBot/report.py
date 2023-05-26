@@ -173,7 +173,7 @@ class Report:
                     self.state = State.REPORT_COMPLETE
                     return ["This harassment does not seem to target a minor. \n"
                             "Please restart your report and select another reason for reporting. \n"
-                            "You can do this by replying 'report'."]
+                            "You can do this by replying `report`."]
                 self.state = State.PERPETRATOR_AGE
                 return [reply]
             except ValueError:

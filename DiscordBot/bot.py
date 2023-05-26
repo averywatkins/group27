@@ -164,7 +164,7 @@ class ModBot(discord.Client):
 
         if self.mod_state == ModState.MOD_START:
             if not message.content.startswith(Review.START_KEYWORD):
-                reply = "Welcome moderator! Please type 'review' to begin moderation or 'cancel' to stop moderation"
+                reply = "Welcome moderator! Please type `review` to begin moderation or `cancel` to stop moderation"
                 return [reply]
             else:
                 reply = "Thank you for starting the moderation process. "
@@ -214,7 +214,7 @@ class ModBot(discord.Client):
                 self.mod_state = ModState.REVIEW_VISUAL_CONTENT
                 return [reply]
             else:
-                reply = "Please respond with 'yes' or 'no'."
+                reply = "Please respond with `yes` or `no`."
                 return [reply]
 
         if self.mod_state == ModState.REVIEW_VISUAL_CONTENT:
@@ -228,12 +228,12 @@ class ModBot(discord.Client):
                     reply += f"More evidence is provided by the reporter as follows: \n {self.current_report.more_evidence}"
                 return [reply]
             elif response == "yes":
-                reply = "Does the message contain CSAM? Saying 'yes' will cause the reported account to be " \
+                reply = "Does the message contain CSAM? Saying `yes` will cause the reported account to be " \
                         "automatically banned and reported to authorities."
                 self.mod_state = ModState.DETECT_CSAM
                 return [reply]
             else:
-                reply = "Please respond with 'yes' or 'no'."
+                reply = "Please respond with `yes` or `no`."
                 return [reply]
 
         if self.mod_state == ModState.DETECT_CSAM:
@@ -251,7 +251,7 @@ class ModBot(discord.Client):
                 self.mod_state = ModState.REVIEW_COMPLETE
                 return [reply]
             else:
-                reply = "Please respond with 'yes' or 'no'."
+                reply = "Please respond with `yes` or `no`."
                 return [reply]
 
         if self.mod_state == ModState.VERIFY_ABUSE_TYPE:
@@ -286,7 +286,7 @@ class ModBot(discord.Client):
                 self.mod_state = ModState.REVIEW_COMPLETE
                 return [reply]
             else:
-                reply = "Please respond with 'yes' or 'no'."
+                reply = "Please respond with `yes` or `no`."
                 return [reply]
 
     def classify_report(self, report):
