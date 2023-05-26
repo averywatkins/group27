@@ -227,7 +227,7 @@ class Report:
                 self.state = State.REPORT_COMPLETE
                 reply = "Thank you for reporting. Our content moderation team will review your report shortly. "
                 reply += "Here are some mental health resources for additional support: https://www.adolescenthealth.org/Resources/Clinical-Care-Resources/Mental-Health/Mental-Health-Resources-For-Adolesc.aspx. "
-                reply += "Another way to get this image taken down **anonymously** is to report it to takeitdown.org."
+                reply += "Another way to get this image taken down **anonymously** is to report it to https://takeitdown.ncmec.org/"
                 return [reply]
             elif response == "2": 
                 self.state = State.MORE_EVIDENCE
