@@ -120,10 +120,12 @@ class ModBot(discord.Client):
 
         # If the report is complete or cancelled, remove it from our map
         if self.reports[author_id].report_complete():
-            self.past_reports[author_id].append(self.reports[author_id])
-            self.reported_users[self.reports[author_id].message.author.id] += 1
-            # here add report to pending moderations before it is popped off the queue
-            self.classify_report(self.reports[author_id])
+            if not self.reports[author_id].report_cancelled():
+                self.past_reports[author_id].append(self.reports[author_id])
+                self.reported_users[self.reports[author_id].message.author.id] += 1
+                # add report to pending moderations before it is popped off the queue
+                self.classify_report(self.reports[author_id])
+            
             self.reports.pop(author_id)
 
     async def handle_channel_message(self, message):
@@ -278,7 +280,7 @@ class ModBot(discord.Client):
     def classify_report(self, report):
         # Classifies reports made by the user to one of 4 levels
         print(self.reported_users)
-        print(report.message.author.name)
+        print(report.message.author.name, report.message.author.id)
 
         if self.reported_users[report.message.author.id] > 2:
             self.pending_moderation['level1'].append(report)

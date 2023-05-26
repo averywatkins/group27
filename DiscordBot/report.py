@@ -7,6 +7,7 @@ class State(Enum):
     AWAITING_MESSAGE = auto()
     MESSAGE_IDENTIFIED = auto()
     REPORT_COMPLETE = auto()
+    REPORT_CANCELLED = auto()
     CONFIRM_MESSAGE = auto()
     OBTAIN_REASON = auto()
     OBTAIN_VICTIM = auto()
@@ -280,7 +281,10 @@ class Report:
         return reply
 
     def report_complete(self):
-        return self.state == State.REPORT_COMPLETE
+        return self.state == State.REPORT_COMPLETE or self.state == State.REPORT_CANCELLED
+    
+    def report_cancelled(self):
+        return self.state == State.REPORT_CANCELLED
     
 
 
