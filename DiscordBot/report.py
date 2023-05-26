@@ -226,7 +226,7 @@ class Report:
             if response == "1": 
                 self.state = State.REPORT_COMPLETE
                 reply = "Thank you for reporting. Our content moderation team will review your report shortly. "
-                reply += "Here are some mental health resources for additional support: (insert a few links). "
+                reply += "Here are some mental health resources for additional support: https://www.adolescenthealth.org/Resources/Clinical-Care-Resources/Mental-Health/Mental-Health-Resources-For-Adolesc.aspx. "
                 reply += "Another way to get this image taken down **anonymously** is to report it to takeitdown.org."
                 return [reply]
             elif response == "2": 
@@ -236,7 +236,7 @@ class Report:
                 return [reply]
             else:
                 prompt = "Does the message include inappropriate images or videos? "
-                prompt += "Here’s some types of content that may be considered inappropriate."
+                prompt += "Here’s some types of content that may be considered inappropriate: https://www.inhope.org/EN/articles/child-sexual-abuse-material"
                 reply = self.reprompt_options(prompt, ["Yes", "No"])
                 return [reply]
             
@@ -249,7 +249,7 @@ class Report:
             self.state = State.REPORT_COMPLETE
             reply = "Thank you for reporting. Our content moderation team will review the report shortly. Would you like to block this user?\n"
             reply += "The user will **NOT** be notified of this action and any further attempts from this user to communicate with you will be blocked.\n"
-            reply += "Here is a link showing you how to block a user. (insert link here)"
+            reply += "Follow the instructions here on how to block a user: https://support.discord.com/hc/en-us/articles/217916488-Blocking-Privacy-Settings-"
             return [reply]
         
         return []
