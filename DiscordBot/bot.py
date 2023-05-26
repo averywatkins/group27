@@ -96,6 +96,7 @@ class ModBot(discord.Client):
         # Check if this message was sent in a server ("guild") or if it's a DM
         if message.guild:
             await self.handle_channel_message(message)
+            await self.do_moderation(message)
         else:
             await self.handle_dm(message)
 
@@ -137,10 +138,12 @@ class ModBot(discord.Client):
             return
 
         # Forward the message to the mod channel
+        '''
+        Not needed for now. We want to stop forwarding.
         mod_channel = self.mod_channels[message.guild.id]
         await mod_channel.send(f'Forwarded message:\n{message.author.name}: "{message.content}"')
         scores = self.eval_text(message.content)
-        await mod_channel.send(self.code_format(scores))
+        await mod_channel.send(self.code_format(scores))'''
 
     async def classify_report(self, author_id):
         # Classifies reports made by the user to one of 4 levels
@@ -167,9 +170,6 @@ class ModBot(discord.Client):
         reply = "Welcome moderator! Type `review` to begin the moderation process, or 'cancel' to stop moderation.\n"
         await message.channel.send(reply)
 
-        # author_id = message.author.id
-        responses = []
-
         if message.content == Review.CANCEL_KEYWORD:
             self.mod_state = ModState.REVIEW_COMPLETE
             return ["Review cancelled."]
@@ -182,9 +182,6 @@ class ModBot(discord.Client):
             else:
                 reply = "Thank you for starting the moderation process. "
                 reply += "Say `help` at any time for more information.\n\n"
-                self.mod_state = ModState.AWAITING_MESSAGE  # is this necessary?
-                #return [reply]
-                # figure this part out!!
 
             for level in range(1, 5):
                 if len(self.pending_moderation[f'level{level}']):

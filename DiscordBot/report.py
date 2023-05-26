@@ -95,6 +95,7 @@ class Report:
         if self.state == State.CONFIRM_MESSAGE:
             confirm_response = message.content.strip().lower()
             if confirm_response == "yes":
+                self.message = message
                 self.state = State.MESSAGE_IDENTIFIED
             elif confirm_response == "no":
                 self.state = State.AWAITING_MESSAGE
