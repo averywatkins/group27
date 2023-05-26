@@ -38,6 +38,7 @@ class ModState(Enum):
     DETECT_CSAM = auto()
     CONFIRM_ABUSE = auto()
     VERIFY_ABUSE_TYPE = auto()
+    CHECK_PHYSICAL_THREAT = auto()
 
 class Review:
     START_KEYWORD = "review"
@@ -238,7 +239,7 @@ class ModBot(discord.Client):
         if self.mod_state == ModState.DETECT_CSAM:
             response = message.content.strip().lower()
             if response == "no":
-                self.mod_state = ModState.VERIFY_ABUSE_TYPE
+                self.mod_state = ModState.VERIFY_ABUSE_TYPE # change to check for physical harm
                 harassment_types = ", ".join(self.current_report.harassment_type)
                 reply = f"Do you think that the contents of this message are of malicious intent particularly " \
                         f"related to {harassment_types} or could be reclassified to another abuse type?\n"
@@ -261,6 +262,13 @@ class ModBot(discord.Client):
                 return [reply]
 
             elif response == "yes":
+                self.mod_state = ModState.CHECK_PHYSICAL_THREAT
+                reply = f"Does the abuse include a legitimate threat of physical harm?\n"
+                return [reply]
+
+        if self.mod_state == ModState.CHECK_PHYSICAL_THREAT:
+            response = message.content.strip().lower()
+            if response == "no":
                 self.mod_state = ModState.CONFIRM_ABUSE
                 if self.current_report.message.author.id in self.suspended_accounts:
                     reply = "The reported account has been automatically banned for being previously suspended" \
@@ -273,6 +281,10 @@ class ModBot(discord.Client):
                     self.suspended_accounts.add(self.current_report.message.author.id)
                     self.mod_state = ModState.REVIEW_COMPLETE
                     return [reply]
+            elif response == "yes":
+                reply = "The reported account has been automatically banned and reported to authorities."
+                self.mod_state = ModState.REVIEW_COMPLETE
+                return [reply]
             else:
                 reply = "Please respond with 'yes' or 'no'."
                 return [reply]
