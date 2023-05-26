@@ -189,14 +189,17 @@ class ModBot(discord.Client):
                 print("Spam detected - user flagged")
                 reply = "This reporter has made over 5 reports and is most likely a spam reporter"
                 self.spam_accounts.add(self.current_report.reporter_id)
-                self.mod_state = ModState.REVIEW_COMPLETE  # for now. Definitely change later.
+                self.mod_state = ModState.REVIEW_COMPLETE  # for now. Definitely change later. Give next report
                 return [reply]
             else:
                 self.mod_state = ModState.SPAM_UNDETECTED
 
         if self.mod_state == ModState.SPAM_UNDETECTED:
             harassment_types = ", ".join(self.current_report.harassment_type)
-            reply = f"This report is a Level {danger_level} report.\nUser {self.current_report.reporter} has reported user " \
+            reply = "We want to warn you that the content you are about to review might potentially contain some " \
+                    "disturbing depictions of child sexual abuse/harassment. Please take care of yourself and take a " \
+                    "break if you need one.\n\n"
+            reply += f"This report is a Level {danger_level} report.\nUser {self.current_report.reporter} has reported user " \
                     f"{self.current_report.message.author.name} on the basis of {harassment_types}.\n The message in question" \
                     f" is {self.current_report.message.content}.\n Here is a link to the conversation for more context:" \
                     f" \n {self.current_report.reported_message_link}.\n Does this message violate any company security policies?"
