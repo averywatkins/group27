@@ -44,6 +44,7 @@ class Report:
         self.message = None
         self.category = Category.NULL
         self.victim = Victim.NULL
+        self.reporter = None
         self.victim_age = -1
         self.perp_age = PerpAge.UNKNOWN
         self.harassment_type = []
@@ -141,7 +142,7 @@ class Report:
                 self.state = State.VICTIM_AGE
                 reply = "How old are you?"
                 return [reply]
-            elif response == "2": # The victim is someone else
+            elif response == "2":  # The victim is someone else
                 self.victim = Victim.OTHER
                 self.state = State.VICTIM_AGE
                 reply = "How old is the victim? If you don't know, type `idk`."
