@@ -62,7 +62,7 @@ class Report:
         print("report for message: ", message)
         reported_message = None
         if message.content == self.CANCEL_KEYWORD:
-            self.state = State.REPORT_COMPLETE
+            self.state = State.REPORT_CANCELLED
             return ["Report cancelled."]
         
         if self.state == State.REPORT_START:
