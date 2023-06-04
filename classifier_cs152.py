@@ -61,8 +61,8 @@ def load_csv_dataset(csv_file):
 
 # Read in train and test datasets, split train into train and dev datasets
 
-train_csv = 'labels.csv'
-test_csv = 'test_labels.csv'
+train_csv = '/home/shreyaravi/pan12/pan12-train/labels.csv'
+test_csv = '/home/shreyaravi/pan12/pan12-test/test_labels.csv'
 
 train_texts, train_labels = load_csv_dataset(train_csv)
 test_texts, test_labels = load_csv_dataset(test_csv)
@@ -183,7 +183,7 @@ def save_model(model, optimizer, filepath):
     print(f"Saved the model to {filepath}")
 
 # Function to finetune model
-def train(train_loader, model, device, optimizer, tokenizer, num_epochs):
+def train(train_loader, dev_loader, model, device, optimizer, tokenizer, num_epochs):
     model.train()
 
     best_dev_acc = 0
@@ -218,7 +218,7 @@ def train(train_loader, model, device, optimizer, tokenizer, num_epochs):
     save_model(model, optimizer, 'last_model.pt')
 
 # Train model, num_epochs = 5, batch_size = 32, lr = 1e-5
-train(train_loader, model, device, optimizer, tokenizer, num_epochs=5)
+train(train_loader, dev_loader, model, device, optimizer, tokenizer, num_epochs=5)
 
 # Generate preds for given data (either dev or test set), batch_size = 32
 val_predictions, val_targets = model_eval(test_loader, model, device)
@@ -240,8 +240,8 @@ print(f"Validation F1 Score: {f1}")
 def predict_text(text):
     # load saved model
     model = AutoModelForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=2)
-    #checkpoint = torch.load('best_model.pt')
-    checkpoint = torch.load('test_model.pt')
+    checkpoint = torch.load('best_model.pt')
+    #checkpoint = torch.load('test_model.pt')
     model.load_state_dict(checkpoint['model'])
     model.to(device)
 
