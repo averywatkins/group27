@@ -3,7 +3,7 @@ import csv
 from collections import defaultdict
 
 # test_folder = "pan12-sexual-predator-identification-test-corpus-2012-05-21/"
-test_folder = "pan12-test/"
+test_folder = "/Users/cathuang/Desktop/pan12/pan12-test/"
 truth_file = open(test_folder + "pan12-sexual-predator-identification-groundtruth-problem2.txt", "r")
 conversation_id_and_line_nums = truth_file.read().splitlines()
 suspicious_messages = defaultdict(list)

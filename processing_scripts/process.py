@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 import csv
 
 # train_folder = "pan12-sexual-predator-identification-training-corpus-2012-05-01/"
-train_folder = "pan12-train/"
+train_folder = "/Users/cathuang/Desktop/pan12/pan12-train/"
 pred_id_file = open(train_folder + "pan12-sexual-predator-identification-training-corpus-predators-2012-05-01.txt", "r")
 predators_id = pred_id_file.read().splitlines()
 # print(predators_id)
