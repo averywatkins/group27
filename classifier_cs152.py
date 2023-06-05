@@ -124,7 +124,7 @@ train_texts, train_labels = zip(*combined_data)
 
 # Create train_loader
 train_dataset = TextDataset(train_texts, train_labels)
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
 
 ### Dev
 # Shuffle dev
@@ -134,7 +134,7 @@ dev_texts, dev_labels = zip(*combined_data)
 
 # Create dev_loader
 dev_dataset = TextDataset(dev_texts, dev_labels)
-dev_loader = DataLoader(dev_dataset, batch_size=16, shuffle=False)
+dev_loader = DataLoader(dev_dataset, batch_size=8, shuffle=False)
 
 ### Test
 # Shuffle test
@@ -144,7 +144,7 @@ test_texts, test_labels = zip(*combined_data)
 
 # Create test_loader
 test_dataset = TextDataset(test_texts, test_labels)
-test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
+test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
 
 # Function that evaluates model with data (either dev or test set)
 
