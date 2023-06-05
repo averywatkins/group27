@@ -102,6 +102,7 @@ def get_eval_metrics(val_predictions, val_targets, eval_output_file, labels_outp
 
     # save eval metrics, cm into output file
     metrics_data = np.array([accuracy, precision, recall, f1])
+    metrics_data = np.vstack((metrics_data, cm.ravel()))
     np.savetxt(eval_output_file, metrics_data, delimiter=',', header="Accuracy, Precision, Recall, F1 Score")
 
     # also save targets and predictions for later access
@@ -109,9 +110,10 @@ def get_eval_metrics(val_predictions, val_targets, eval_output_file, labels_outp
     df.to_csv(labels_output_file, index=False)
 
 # Generate test_loader for evaluation
-# test_csv = 'test_labels.csv'
-# test_texts, test_labels = load_csv_dataset(test_csv)
+test_csv = '/home/shreyaravi/pan12/pan12-test/test_labels.csv'
+test_texts, test_labels = load_csv_dataset(test_csv)
 
+"""
 test_texts = [
     "I received a suspicious email today.",
     "The weather is beautiful outside.",
@@ -121,6 +123,7 @@ test_texts = [
 ]
 
 test_labels = [1, 0, 1, 0, 1]
+"""
 
 # Shuffle test dataset randomly, create TextDataset
 class TextDataset(Dataset):
