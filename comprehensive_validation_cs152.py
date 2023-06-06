@@ -110,8 +110,22 @@ def get_eval_metrics(val_predictions, val_targets, eval_output_file, labels_outp
     df.to_csv(labels_output_file, index=False)
 
 # Generate test_loader for evaluation
-test_csv = '/home/shreyaravi/pan12/pan12-test/test_labels.csv'
-test_texts, test_labels = load_csv_dataset(test_csv)
+test_csv = '../pan12/pan12-test/test_labels.csv'
+raw_texts, raw_labels = load_csv_dataset(test_csv)
+test_texts = []
+test_labels = []
+for i in range(1000):
+    idx = random.randint(0, len(raw_texts)-1)
+    test_texts.append(raw_texts[idx])
+    test_labels.append(raw_labels[idx])
+
+csv_rows = []
+for i in range(1000):
+    csv_rows.append([test_texts[i], test_labels[i]])
+
+with open('test_subset_labels.csv', 'w', newline='') as f:
+    writer = csv.writer(f, dialect='unix')
+    writer.writerows(csv_rows)
 
 """
 test_texts = [
