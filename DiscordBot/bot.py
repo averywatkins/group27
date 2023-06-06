@@ -201,10 +201,31 @@ class ModBot(discord.Client):
                     "break if you need one.\n\n"
             reply += f"This report is a Level {danger_level} report.\nUser {self.current_report.reporter} has reported user " \
                     f"{self.current_report.message.author.name} on the basis of {harassment_types}.\n The message in question" \
-                    f" is {self.current_report.message.content}.\n Here is a link to the conversation for more context:" \
-                    f" \n {self.current_report.reported_message_link}.\n Does this message violate any company security policies?"
-            self.mod_state = ModState.VERIFY_POLICY_VIOLATION
+                    f" is: {self.current_report.message.content}.\n Here is a link to the conversation for more context:" \
+                    f" \n {self.current_report.reported_message_link}.\n " \
+                    f" This report is currently classified as potential child sexual abuse including {harassment_types}. \n" \
+                    f" Do you think that this abuse type is correct?  \n" \
+                    f" Please reply yes or no."
+            self.mod_state = ModState.VERIFY_ABUSE_TYPE
             return [reply]
+
+        if self.mod_state == ModState.VERIFY_ABUSE_TYPE:
+            response = message.content.strip().lower()
+            if response == "no":
+                reply = f"You have noted that this report is not related to child sexual abuse. \n " \
+                        f"As such, it is out of the scope of this bot and will sent to other reporting flows"
+                self.mod_state = ModState.REVIEW_COMPLETE
+                return [reply]
+            elif response == "yes":
+                reply = "Does this message violate any company child safety policies?"
+                if self.current_report.more_evidence is not None:
+                    reply += f"More evidence is provided by the reporter as follows: \n {self.current_report.more_evidence}"
+                    return [reply]
+                self.mod_state = ModState.VERIFY_POLICY_VIOLATION
+                return [reply]
+            else:
+                reply = "Please respond with `yes` or `no`."
+                return [reply]
 
         if self.mod_state == ModState.VERIFY_POLICY_VIOLATION:
             response = message.content.strip().lower()
@@ -220,55 +241,40 @@ class ModBot(discord.Client):
                 reply = "Please respond with `yes` or `no`."
                 return [reply]
 
+        # response to does this include photos/videos
         if self.mod_state == ModState.REVIEW_VISUAL_CONTENT:
             response = message.content.strip().lower()
             if response == "no":
-                self.mod_state = ModState.VERIFY_ABUSE_TYPE
-                harassment_types = ", ".join(self.current_report.harassment_type)
-                reply = f"Do you think that the contents of this message are of malicious intent particularly " \
-                        f"related to {harassment_types} or could be reclassified to another abuse type?\n"
-                if self.current_report.more_evidence is not None:
-                    reply += f"More evidence is provided by the reporter as follows: \n {self.current_report.more_evidence}"
-                return [reply]
-            elif response == "yes":
-                reply = "Does the message contain CSAM? Saying `yes` will cause the reported account to be " \
-                        "automatically banned and reported to authorities."
-                self.mod_state = ModState.DETECT_CSAM
-                return [reply]
-            else:
-                reply = "Please respond with `yes` or `no`."
-                return [reply]
-
-        if self.mod_state == ModState.DETECT_CSAM:
-            response = message.content.strip().lower()
-            if response == "no":
-                self.mod_state = ModState.VERIFY_ABUSE_TYPE # change to check for physical harm
-                harassment_types = ", ".join(self.current_report.harassment_type)
-                reply = f"Do you think that the contents of this message are of malicious intent particularly " \
-                        f"related to {harassment_types} or could be reclassified to another abuse type?\n"
-                if self.current_report.more_evidence is not None:
-                    reply += f"More evidence is provided by the reporter as follows: \n {self.current_report.more_evidence}"
-                return [reply]
-            elif response == "yes":
-                reply = "The reported account has been automatically banned and reported to authorities."
-                self.mod_state = ModState.REVIEW_COMPLETE
-                return [reply]
-            else:
-                reply = "Please respond with `yes` or `no`."
-                return [reply]
-
-        if self.mod_state == ModState.VERIFY_ABUSE_TYPE:
-            response = message.content.strip().lower()
-            if response == "no":
-                self.mod_state = ModState.REVIEW_COMPLETE
-                reply = "No further action necessary. The reporter will be asked if they want to block this user."
-                return [reply]
-
-            elif response == "yes":
                 self.mod_state = ModState.CHECK_PHYSICAL_THREAT
                 reply = f"Does the abuse include a legitimate threat of physical harm?\n"
                 return [reply]
+            elif response == "yes":
+                self.mod_state = ModState.DETECT_CSAM
+                reply = "Does the message contain CSAM? Saying `yes` will cause the image to be hashed against " \
+                        "known CSAM and, if previously unknown, to be reported to NCMEC" \
+                        "The reported account to will also be automatically banned and reported to local authorities."
+                return [reply]
+            else:
+                reply = "Please respond with `yes` or `no`."
+                return [reply]
 
+        # response to does this include CSAM
+        if self.mod_state == ModState.DETECT_CSAM:
+            response = message.content.strip().lower()
+            if response == "no":
+                self.mod_state = ModState.CHECK_PHYSICAL_THREAT
+                reply = f"Does the abuse include a legitimate threat of physical harm?\n"
+                return [reply]
+            elif response == "yes":
+                reply = "The reported account has been automatically banned and reported to authorities. " \
+                        "The image has been hashed into NCMEC."
+                self.mod_state = ModState.REVIEW_COMPLETE
+                return [reply]
+            else:
+                reply = "Please respond with `yes` or `no`."
+                return [reply]
+
+        # response to the question does this include a threat of physical harm
         if self.mod_state == ModState.CHECK_PHYSICAL_THREAT:
             response = message.content.strip().lower()
             if response == "no":
