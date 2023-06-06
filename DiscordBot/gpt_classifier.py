@@ -1,5 +1,4 @@
 import openai
-import csv
 import pandas as pd
 from sklearn.metrics import precision_score, recall_score, f1_score
 
@@ -38,7 +37,6 @@ def evaluate_predictions():
     predicted_scores = []
 
     with open("output_labels.csv", 'r') as csvfile:
-        reader = csv.reader(csvfile)
         df = pd.read_csv(csvfile, header=None, skiprows=100)
         sampled_df = df.sample(n=100000)
 
@@ -77,7 +75,3 @@ def evaluate_predictions():
         file.write(str(accuracy) + '\n')
     print(f"Accuracy: {accuracy:.2f}%, Recall: {recall:.2f}%, Precision: {precision:.2f}%, F1 score: {f1:.2f}%")
     return accuracy
-
-
-if __name__ == '__main__':
-    print(generate_response("May I see ur boobs?"))

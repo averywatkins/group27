@@ -33,6 +33,20 @@ class PerpAge(Enum):
     UNDER_18 = auto()
     OVER_18 = auto()
 
+class AutomatedReport:
+    def __init__(self, client):
+        self.perpatrator = client
+        self.message = None
+        self.reported_message_link = None  # no way of retrieving yet
+        self.harassment_type = []
+        self.more_evidence = None
+
+    async def handle_message(self, message):
+        self.harassment_type.append("Grooming")
+        self.message = message
+        self.perpatrator = message.author.id
+        return []
+
 class Report:
     START_KEYWORD = "report"
     CANCEL_KEYWORD = "cancel"

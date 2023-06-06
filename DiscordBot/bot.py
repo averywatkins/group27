@@ -6,10 +6,11 @@ import json
 import logging
 import re
 import requests
-from report import Report, PerpAge
+from report import Report, PerpAge, AutomatedReport
 from enum import Enum, auto
 from collections import defaultdict
 from classifier_cs152 import predict_text
+from gpt_classifier import generate_response
 import pdb
 
 # Set up logging to the console
@@ -34,10 +35,10 @@ class ModState(Enum):
     REVIEW_OBTAINED = auto()
     REVIEW_COMPLETE = auto()
     SPAM_UNDETECTED = auto()
+    AUTO_REVIEW_OBTAINED = auto()
     VERIFY_POLICY_VIOLATION = auto()
     REVIEW_VISUAL_CONTENT = auto()
     DETECT_CSAM = auto()
-    CONFIRM_ABUSE = auto()
     VERIFY_ABUSE_TYPE = auto()
     CHECK_PHYSICAL_THREAT = auto()
 
@@ -54,12 +55,13 @@ class ModBot(discord.Client):
         self.mod_channels = {}  # Map from guild to the mod channel id for that guild
         self.reports = {}  # Map from user IDs to the state of their report
         self.automated_reports = {}
+        self.curr_auto_report = None
         self.current_report = None
         self.past_reports = defaultdict(list)
         self.reported_users = defaultdict(int)
         self.spam_accounts = set()
         self.suspended_accounts = set()
-        self.pending_moderation = {'level1': [], 'level2': [], 'level3': [], 'level4': []}
+        self.pending_moderation = {'level1': [], 'level2': [], 'level3': [], 'level4': [], 'level5': []}
         self.mod_state = ModState.MOD_START
 
     async def on_ready(self):
@@ -140,11 +142,14 @@ class ModBot(discord.Client):
 
         if not message.channel.name == f'group-{self.group_num}':
             return
-        score = predict_text(message)
-        if score == 1:
-
-            pass
-
+        score1 = predict_text(message)
+        score2 = generate_response(message)
+        if score1 == 1 or score2 == 1:
+            author_id = message.author.id
+            if author_id not in self.automated_reports:
+                self.automated_reports[author_id] = AutomatedReport(self)
+                self.automated_reports[author_id].handle_message(message)
+                self.pending_moderation['level5'].append(self.automated_reports[author_id])
         # Forward the message to the mod channel
         '''
         Not needed for now. We want to stop forwarding.
@@ -185,9 +190,15 @@ class ModBot(discord.Client):
                     self.mod_state = ModState.REVIEW_OBTAINED
                     break
             if self.mod_state != ModState.REVIEW_OBTAINED:
-                reply += "There are no reports to be moderated at this time. Thank you!"
-                self.mod_state = ModState.REVIEW_COMPLETE
-                return [reply]
+                if len(self.pending_moderation[f'level5']):
+                    self.curr_auto_report = self.pending_moderation[f'level5'][0]
+                    self.pending_moderation[f'level5'].pop(0)
+                    reply += "There is a message automatically detected to be reviewed at this time.\n"
+                    self.mod_state = ModState.AUTO_REVIEW_OBTAINED
+                else:
+                    reply += "There are no reports to be moderated at this time. Thank you!"
+                    self.mod_state = ModState.REVIEW_COMPLETE
+                    return [reply]
 
         if self.mod_state == ModState.REVIEW_OBTAINED:
             # clarify this part once we know how to save multiple reports made by the same user
@@ -199,6 +210,19 @@ class ModBot(discord.Client):
                 return [reply]
             else:
                 self.mod_state = ModState.SPAM_UNDETECTED
+
+        if self.mod_state == ModState.AUTO_REVIEW_OBTAINED:
+            harassment_types = ", ".join(self.curr_auto_report.harassment_type)
+            reply = "We want to warn you that the content you are about to review might potentially contain some " \
+                    "disturbing depictions of child sexual abuse/harassment. Please take care of yourself and take a " \
+                    "break if you need one.\n\n"
+            reply += f"This report is a report made by our automatic detector.\nUser {self.curr_auto_report.perpatrator} is " \
+                     f"being flagged on the basis of {harassment_types}.\n The message in question" \
+                     f" is {self.curr_auto_report.message.content}.\n Here is a link to the conversation for more context:" \
+                     f" \n {self.curr_auto_report.reported_message_link}.\n Does this message violate any company security policies?"
+            self.current_report = self.curr_auto_report
+            self.mod_state = ModState.VERIFY_POLICY_VIOLATION
+            return [reply]
 
         if self.mod_state == ModState.SPAM_UNDETECTED:
             harassment_types = ", ".join(self.current_report.harassment_type)
@@ -278,7 +302,6 @@ class ModBot(discord.Client):
         if self.mod_state == ModState.CHECK_PHYSICAL_THREAT:
             response = message.content.strip().lower()
             if response == "no":
-                self.mod_state = ModState.CONFIRM_ABUSE
                 if self.current_report.message.author.id in self.suspended_accounts:
                     reply = "The reported account has been automatically banned for being previously suspended" \
                             " in other abuse cases."
