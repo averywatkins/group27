@@ -4,12 +4,12 @@ import pandas as pd
 from sklearn.metrics import precision_score, recall_score, f1_score
 
 #openai.organization = "org-YVZe9QFuR0Ke0J0rqr7l2R2L"
-openai.api_key = open("openai-key.txt", "r").readline()
+#openai.api_key = open("openai-key.txt", "r").readline()
 open("openai-key.txt", "r").close()
 
 
 def remove_dups():
-    df = pd.read_csv('test_labels.csv')
+    df = pd.read_csv('../test_subset_labels.csv')
     df = df.drop_duplicates()
     df.to_csv('output_labels.csv', index=False)
 
@@ -25,11 +25,19 @@ def generate_response(conversation):
                "I promise I won’t save them. Trust me`\n" \
                "A phrase with a score of 0 would be: `Happy birthday!`\n Evaluate the following message." \
                "Only output number 0 or 1: \n"
-
+    
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "system", "content": f"{preamble}{conversation}"}]
     )
+    
+    '''
+    response = openai.Completion.create(
+        model="text-davinci-003",
+        prompt=f"{preamble}{conversation}"
+    )
+    '''
+
     return response["choices"][0]['message']['content']
 
 
@@ -37,10 +45,10 @@ def evaluate_predictions():
     actual_scores = []
     predicted_scores = []
 
-    with open("output_labels.csv", 'r') as csvfile:
+    with open("../test_subset_labels.csv", 'r') as csvfile:
         reader = csv.reader(csvfile)
-        df = pd.read_csv(csvfile, header=None, skiprows=100)
-        sampled_df = df.sample(n=100000)
+        sampled_df = pd.read_csv(csvfile, header=None)
+        #sampled_df = df.sample(n=100000)
 
         i = 1
         for index, row in sampled_df.iterrows():
@@ -79,5 +87,3 @@ def evaluate_predictions():
     return accuracy
 
 
-if __name__ == '__main__':
-    print(generate_response("May I see ur boobs?"))

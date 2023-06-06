@@ -114,11 +114,24 @@ test_csv = '../pan12/pan12-test/test_labels.csv'
 raw_texts, raw_labels = load_csv_dataset(test_csv)
 test_texts = []
 test_labels = []
-for i in range(1000):
-    idx = random.randint(0, len(raw_texts)-1)
-    test_texts.append(raw_texts[idx])
-    test_labels.append(raw_labels[idx])
+stop = False
 
+idx_arr = np.arange(len(raw_texts))
+np.random.shuffle(idx_arr)
+idx_i = 0
+num_sus = 0
+num_fine = 0
+while len(test_texts) < 1000:
+    idx = idx_arr[idx_i]
+    if (raw_labels[idx] == 0 and num_fine < 500):
+        test_texts.append(raw_texts[idx])
+        test_labels.append(raw_labels[idx])
+        num_fine += 1
+    if (raw_labels[idx] == 1 and num_sus < 500):
+        test_texts.append(raw_texts[idx])
+        test_labels.append(raw_labels[idx])
+        num_sus += 1
+    idx_i += 1
 csv_rows = []
 for i in range(1000):
     csv_rows.append([test_texts[i], test_labels[i]])
@@ -163,9 +176,9 @@ test_dataset = TextDataset(test_texts, test_labels)
 test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
 
 # Generate preds for given data
-model_paths = ["last_model.pt", "best_model.pt"]
-eval_output_files = ["eval_last_model.csv", "eval_best_model.csv"]
-labels_output_files = ["labels_last_model.csv", "labels_best_model.csv"]
+model_paths = ["best_model.pt"]
+eval_output_files = ["eval_best_model.csv"]
+labels_output_files = ["labels_best_model.csv"]
 
 for i, model_path in enumerate(model_paths):
   model = load_model(model_path, device)
