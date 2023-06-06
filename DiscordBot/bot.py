@@ -140,17 +140,20 @@ class ModBot(discord.Client):
             for r in responses:
                 await message.channel.send(r)
 
-        if not message.channel.name == f'group-{self.group_num}':
-            return
-        score1 = predict_text(message)
-        score2 = generate_response(message)
-        if score1 == 1 or score2 == 1:
-            author_id = message.author.id
-            if author_id not in self.automated_reports:
-                self.automated_reports[author_id] = AutomatedReport(self)
-                self.automated_reports[author_id].handle_message(message)
-                self.pending_moderation['level5'].append(self.automated_reports[author_id])
-        # Forward the message to the mod channel
+        if message.channel.name == f'group-{self.group_num}':
+            score1 = predict_text(message)
+            score2 = int(generate_response(message))
+            print(score2)
+            if score1 == 1 or score2 == 1:
+                print("suspicious!")
+                reply = "This is message is being marked as suspicious for grooming/sexual harassment of a minor!"
+                author_id = message.author.id
+                if author_id not in self.automated_reports:
+                    self.automated_reports[author_id] = AutomatedReport(self)
+                    await self.automated_reports[author_id].handle_message(message)
+                    self.pending_moderation['level5'].append(self.automated_reports[author_id])
+                await message.channel.send(reply)
+
         '''
         Not needed for now. We want to stop forwarding.
         mod_channel = self.mod_channels[message.guild.id]
