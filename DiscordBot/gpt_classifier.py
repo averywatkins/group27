@@ -3,7 +3,7 @@ import csv
 import pandas as pd
 from sklearn.metrics import precision_score, recall_score, f1_score
 
-openai.organization = "org-YVZe9QFuR0Ke0J0rqr7l2R2L"
+#openai.organization = "org-YVZe9QFuR0Ke0J0rqr7l2R2L"
 openai.api_key = open("openai-key.txt", "r").readline()
 open("openai-key.txt", "r").close()
 
@@ -27,7 +27,7 @@ def generate_response(conversation):
                "Only output number 0 or 1: \n"
 
     response = openai.ChatCompletion.create(
-        model="gpt-4",
+        model="gpt-3.5-turbo",
         messages=[{"role": "system", "content": f"{preamble}{conversation}"}]
     )
     return response["choices"][0]['message']['content']
@@ -80,4 +80,4 @@ def evaluate_predictions():
 
 
 if __name__ == '__main__':
-    evaluate_predictions()
+    print(generate_response("May I see ur boobs?"))

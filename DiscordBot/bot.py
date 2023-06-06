@@ -9,6 +9,7 @@ import requests
 from report import Report, PerpAge
 from enum import Enum, auto
 from collections import defaultdict
+from classifier_cs152 import predict_text
 import pdb
 
 # Set up logging to the console
@@ -52,6 +53,7 @@ class ModBot(discord.Client):
         self.group_num = None
         self.mod_channels = {}  # Map from guild to the mod channel id for that guild
         self.reports = {}  # Map from user IDs to the state of their report
+        self.automated_reports = {}
         self.current_report = None
         self.past_reports = defaultdict(list)
         self.reported_users = defaultdict(int)
@@ -138,6 +140,10 @@ class ModBot(discord.Client):
 
         if not message.channel.name == f'group-{self.group_num}':
             return
+        score = predict_text(message)
+        if score == 1:
+
+            pass
 
         # Forward the message to the mod channel
         '''
