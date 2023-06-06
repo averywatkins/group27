@@ -7,6 +7,7 @@ import logging
 import re
 import requests
 from report import Report, PerpAge, AutomatedReport
+import openai
 from enum import Enum, auto
 from collections import defaultdict
 #from classifier_cs152 import predict_text
@@ -186,7 +187,16 @@ class ModBot(discord.Client):
 
         if message.channel.name == f'group-{self.group_num}':
             score1 = predict_text(message)
-            score2 = int(generate_response(message))
+            score2 = "0"
+            try:
+                score2 = generate_response(message)
+            except openai.error.RateLimitError as e:
+                print('Error occurred:', e)
+            except openai.error.APIError as e:
+                print('Error occurred:', e)
+            except openai.error.OpenAIError as e:
+                print('Error occurred:', e)
+            score2 = int(score2)
             print(score2)
             if score1 == 1 or score2 == 1:
                 print("suspicious!")
