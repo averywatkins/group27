@@ -9,9 +9,32 @@ import requests
 from report import Report, PerpAge, AutomatedReport
 from enum import Enum, auto
 from collections import defaultdict
-from classifier_cs152 import predict_text
+#from classifier_cs152 import predict_text
 from gpt_classifier import generate_response
 import pdb
+
+import pandas as pd
+import openai
+from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix, accuracy_score
+import time
+
+import csv
+import sys
+import random
+import torch
+from torch.utils.data import DataLoader, Dataset
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, AdamW
+from tqdm import tqdm
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.model_selection import train_test_split
+
+tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
+
+model = AutoModelForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=2)
+checkpoint = torch.load('../best_model.pt')
+model.load_state_dict(checkpoint['model'])
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+model.to(device)
 
 # Set up logging to the console
 logger = logging.getLogger('discord')
@@ -19,6 +42,27 @@ logger.setLevel(logging.DEBUG)
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
+
+def predict_text(text):
+    # do prediction steps
+    encoded_inputs = tokenizer([text], padding=True, truncation=True, return_tensors='pt')
+    input_ids = encoded_inputs['input_ids'].to(device)
+    attention_mask = encoded_inputs['attention_mask'].to(device)
+
+    with torch.no_grad():
+        outputs = model(input_ids, attention_mask=attention_mask)
+        logits = outputs.logits
+        predictions = torch.argmax(logits, dim=1)
+
+    predicted_label = predictions.item()
+    if predicted_label.split()[0].isdigit():
+        label = int(prediction.split()[0])
+        if label != 1:
+            label = 0
+        return label
+    return 0
+
+
 
 # There should be a file called 'tokens.json' inside the same folder as this file
 token_path = 'tokens.json'
