@@ -1,5 +1,4 @@
 import openai
-import csv
 import pandas as pd
 from sklearn.metrics import precision_score, recall_score, f1_score
 
@@ -85,5 +84,3 @@ def evaluate_predictions():
         file.write(str(accuracy) + '\n')
     print(f"Accuracy: {accuracy:.2f}%, Recall: {recall:.2f}%, Precision: {precision:.2f}%, F1 score: {f1:.2f}%")
     return accuracy
-
-
