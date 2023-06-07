@@ -223,6 +223,16 @@ class Report:
                 reply = self.reprompt_options_choose_many("What type of harassment is this message?",
                                 ["Blackmail", "Threats of Physical Harm",
                                  "Solicitation", "Manipulation", "Other"])
+                if self.victim_age <= 15:
+                    reply = self.reprompt_options_choose_many("What type of harassment is this message?",
+                                                              ["Blackmail (Example: `If you don't send this to me, I "
+                                                               "will show everyone this photo`)", "Threats of Physical "
+                                                                "Harm (Example: `If you don't send this to me, I will "
+                                                                "hurt you`)", "Solicitation (Example: `Please send me "
+                                                                "nude images`)", "Manipulation (Example: `I am your "
+                                                                "friend, you can trust that I won't show anyone`)",
+                                                               "Other"])
+                    return [reply]
                 return [reply]
             
             self.state = State.DETECT_CSAM
