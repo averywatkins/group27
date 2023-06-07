@@ -102,6 +102,7 @@ class ModBot(discord.Client):
         self.automated_reports = {}
         self.curr_auto_report = None
         self.current_report = None
+        self.is_auto = False
         self.past_reports = defaultdict(list)
         self.reported_users = defaultdict(int)
         self.spam_accounts = set()
@@ -275,9 +276,11 @@ class ModBot(discord.Client):
                     "break if you need one.\n\n"
             reply += f"This report is a report made by our automatic detector.\nUser {self.curr_auto_report.perpatrator} is " \
                      f"being flagged on the basis of {harassment_types}.\n The message in question" \
-                     f" is {self.curr_auto_report.message.content}.\n Here is a link to the conversation for more context:" \
-                     f" \n {self.curr_auto_report.reported_message_link}.\n Does this message violate any company security policies?"
+                     f" is {self.curr_auto_report.message.content}.\n For more context, this exchange occurs in the " \
+                     f" \n {self.curr_auto_report.message.channel} channel.\n Does this message (or conversation) violate " \
+                     f"any company security policies?"
             self.current_report = self.curr_auto_report
+            self.is_auto = True
             self.mod_state = ModState.VERIFY_POLICY_VIOLATION
             return [reply]
 
@@ -319,6 +322,8 @@ class ModBot(discord.Client):
             if response == "no":
                 self.mod_state = ModState.REVIEW_COMPLETE
                 reply = "No further action necessary. The reporter will be asked if they want to block this user."
+                if self.is_auto:
+                    reply = "No further action necessary."
                 return [reply]
             elif response == "yes":
                 reply = "Does the message contain images or videos?"
