@@ -99,7 +99,6 @@ class ModBot(discord.Client):
         self.group_num = None
         self.mod_channels = {}  # Map from guild to the mod channel id for that guild
         self.reports = {}  # Map from user IDs to the state of their report
-        self.automated_reports = {}
         self.curr_auto_report = None
         self.current_report = None
         self.is_auto = False
@@ -203,10 +202,9 @@ class ModBot(discord.Client):
                 print("suspicious!")
                 reply = "This is message is being marked as suspicious for grooming/sexual harassment of a minor!"
                 author_id = message.author.id
-                if author_id not in self.automated_reports:
-                    self.automated_reports[author_id] = AutomatedReport(self)
-                    await self.automated_reports[author_id].handle_message(message)
-                    self.pending_moderation['level5'].append(self.automated_reports[author_id])
+                auto_report = AutomatedReport(self) 
+                auto_report.handle_message(message)
+                self.pending_moderation['level5'].append(auto_report)
                 await message.channel.send(reply)
 
         '''
